@@ -96,8 +96,8 @@ done:
 }
 
 CK_RV rsa_encrypt_encrypt(CK_SESSION_HANDLE session) {
-    CK_OBJECT_HANDLE signing_public_key = CK_INVALID_HANDLE;
-    CK_OBJECT_HANDLE signing_private_key = CK_INVALID_HANDLE;
+    CK_OBJECT_HANDLE decrypting_public_key = CK_INVALID_HANDLE;
+    CK_OBJECT_HANDLE encrypting_private_key = CK_INVALID_HANDLE;
 
     CK_RV rv = generate_rsa_keypair(session, 2048, &signing_public_key, &signing_private_key);
     if (rv != CKR_OK) {
@@ -114,7 +114,7 @@ CK_RV rsa_encrypt_encrypt(CK_SESSION_HANDLE session) {
     // Set the PKCS11 signature mechanism type.
     CK_MECHANISM_TYPE mechanism = CKM_RSA_PKCS;
 
-    rv = rsa_encrypt(session, signing_private_key, mechanism,
+    rv = rsa_encrypt(session, encrypting_private_key, mechanism,
                             data, data_length, ciphertext, &ciphertext_length);
     if (rv == CKR_OK) {
         unsigned char *hex_ciphertext = NULL;
