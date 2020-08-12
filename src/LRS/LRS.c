@@ -119,7 +119,7 @@ CK_RV rsa_encrypt_encrypt(CK_SESSION_HANDLE session) {
     if (rv == CKR_OK) {
         unsigned char *hex_ciphertext = NULL;
         bytes_to_new_hexstring(ciphertext, ciphertext_length, &hex_ciphertext);
-        if (!hex_signature) {
+        if (!hex_ciphertext) {
             printf("Could not allocate hex array\n");
             return 1;
         }
@@ -170,7 +170,7 @@ int main(int argc, char **argv) {
     }
 
     printf("Encrypt with RSA\n");
-    rv = rsa_main(session);
+    rv = rsa_encrypt_encrypt(session);
     if (rv != CKR_OK)
         return rv;
 
