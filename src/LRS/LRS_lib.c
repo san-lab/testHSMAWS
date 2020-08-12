@@ -56,8 +56,10 @@ CK_RV generate_rsa_keypair(CK_SESSION_HANDLE session,
     mech.mechanism = CKM_RSA_PKCS_KEY_PAIR_GEN;
     mech.ulParameterLen = 0;
     mech.pParameter = NULL;
+    CK_KEY_TYPE keyTypePub = CKK_RSA;
+    CK_KEY_TYPE keyTypePriv = CKK_RSA;
 
-    CK_ATTRIBUTE public_key_template[] = {
+    /*CK_ATTRIBUTE public_key_template[] = {
             {CKA_DECRYPT,          &true_val,            sizeof(CK_BBOOL)},
             {CKA_MODULUS_BITS,    &key_length_bits, sizeof(CK_ULONG)},
             {CKA_PUBLIC_EXPONENT, &public_exponent, sizeof(public_exponent)},
@@ -65,6 +67,18 @@ CK_RV generate_rsa_keypair(CK_SESSION_HANDLE session,
 
     CK_ATTRIBUTE private_key_template[] = {
             {CKA_ENCRYPT, &true_val, sizeof(CK_BBOOL)},
+    };*/
+
+    CK_ATTRIBUTE public_key_template[] = {
+       {CKA_KEY_TYPE,       &keyTypePub,              sizeof(keyTypePub)},
+       {CKA_TOKEN,          &false_val,            sizeof(CK_BBOOL)},
+       {CKA_ENCRYPT,        &true_val,             sizeof(CK_BBOOL)},
+    };
+
+    CK_ATTRIBUTE private_key_template[] = {
+      {CKA_KEY_TYPE,       &keyTypePriv,          sizeof(keyTypePriv)},
+      {CKA_TOKEN,          &false_val,            sizeof(CK_BBOOL)},
+      {CKA_DECRYPT,        &true_val,             sizeof(CK_BBOOL)},
     };
 
     rv = funcs->C_GenerateKeyPair(session,
