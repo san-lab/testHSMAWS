@@ -127,7 +127,7 @@ CK_RV rsa_encrypt_encrypt(CK_SESSION_HANDLE session) {
         printf("Data: %s\n", data);
         printf("Signature: %s\n", hex_ciphertext);
         free(hex_ciphertext);
-        hex_signature = NULL;
+        hex_ciphertext = NULL;
     } else {
         printf("Signature generation failed: %lu\n", rv);
         return rv;
