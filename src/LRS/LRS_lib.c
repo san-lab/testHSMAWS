@@ -51,7 +51,7 @@ CK_RV generate_rsa_keypair(CK_SESSION_HANDLE session,
                            CK_OBJECT_HANDLE_PTR private_key) {
     CK_RV rv;
     CK_MECHANISM mech;
-    CK_BYTE public_exponent[] = {0x01, 0x00, 0x01};
+    //CK_BYTE public_exponent[] = {0x01, 0x00, 0x01};
 
     mech.mechanism = CKM_RSA_PKCS_KEY_PAIR_GEN;
     mech.ulParameterLen = 0;
