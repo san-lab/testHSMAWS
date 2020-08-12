@@ -95,6 +95,56 @@ done:
     return rv;
 }
 
+CK_RV rsa_encrypt_encrypt(CK_SESSION_HANDLE session) {
+    CK_OBJECT_HANDLE signing_public_key = CK_INVALID_HANDLE;
+    CK_OBJECT_HANDLE signing_private_key = CK_INVALID_HANDLE;
+
+    CK_RV rv = generate_rsa_keypair(session, 2048, &signing_public_key, &signing_private_key);
+    if (rv != CKR_OK) {
+        printf("RSA key generation failed: %lu\n", rv);
+        return rv;
+    }
+
+    CK_BYTE_PTR data = "Here is some data to encrypt";
+    CK_ULONG data_length = strlen(data);
+
+    CK_BYTE ciphertext [MAX_SIGNATURE_LENGTH];
+    CK_ULONG ciphertext_length = MAX_SIGNATURE_LENGTH;
+
+    // Set the PKCS11 signature mechanism type.
+    CK_MECHANISM_TYPE mechanism = CKM_RSA_PKCS;
+
+    rv = rsa_encrypt(session, signing_private_key, mechanism,
+                            data, data_length, ciphertext, &ciphertext_length);
+    if (rv == CKR_OK) {
+        unsigned char *hex_ciphertext = NULL;
+        bytes_to_new_hexstring(ciphertext, ciphertext_length, &hex_ciphertext);
+        if (!hex_signature) {
+            printf("Could not allocate hex array\n");
+            return 1;
+        }
+
+        printf("Data: %s\n", data);
+        printf("Signature: %s\n", hex_ciphertext);
+        free(hex_ciphertext);
+        hex_signature = NULL;
+    } else {
+        printf("Signature generation failed: %lu\n", rv);
+        return rv;
+    }
+
+    /*rv = verify_signature(session, signing_public_key, mechanism,
+                          data, data_length, signature, signature_length);
+    if (rv == CKR_OK) {
+        printf("Verification successful\n");
+    } else {
+        printf("Verification failed: %lu\n", rv);
+        return rv;
+    }*/
+
+    return CKR_OK;
+}
+
 int main(int argc, char **argv) {
     CK_RV rv;
     CK_SESSION_HANDLE session;
@@ -118,6 +168,11 @@ int main(int argc, char **argv) {
     if (CKR_OK != rv) {
         return rv;
     }
+
+    printf("Encrypt with RSA\n");
+    rv = rsa_main(session);
+    if (rv != CKR_OK)
+        return rv;
 
     pkcs11_finalize_session(session);
 

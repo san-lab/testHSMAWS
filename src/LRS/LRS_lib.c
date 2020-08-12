@@ -44,3 +44,57 @@ CK_RV generate_aes_key(CK_SESSION_HANDLE session,
 
     return funcs->C_GenerateKey(session, &mech, template, sizeof(template) / sizeof(CK_ATTRIBUTE), key);
 }
+
+CK_RV generate_rsa_keypair(CK_SESSION_HANDLE session,
+                           CK_ULONG key_length_bits,
+                           CK_OBJECT_HANDLE_PTR public_key,
+                           CK_OBJECT_HANDLE_PTR private_key) {
+    CK_RV rv;
+    CK_MECHANISM mech;
+    CK_BYTE public_exponent[] = {0x01, 0x00, 0x01};
+
+    mech.mechanism = CKM_RSA_X9_31_KEY_PAIR_GEN;
+    mech.ulParameterLen = 0;
+    mech.pParameter = NULL;
+
+    CK_ATTRIBUTE public_key_template[] = {
+            {CKA_VERIFY,          &true_val,            sizeof(CK_BBOOL)},
+            {CKA_MODULUS_BITS,    &key_length_bits, sizeof(CK_ULONG)},
+            {CKA_PUBLIC_EXPONENT, &public_exponent, sizeof(public_exponent)},
+    };
+
+    CK_ATTRIBUTE private_key_template[] = {
+            {CKA_SIGN, &true_val, sizeof(CK_BBOOL)},
+    };
+
+    rv = funcs->C_GenerateKeyPair(session,
+                                  &mech,
+                                  public_key_template, sizeof(public_key_template) / sizeof(CK_ATTRIBUTE),
+                                  private_key_template, sizeof(private_key_template) / sizeof(CK_ATTRIBUTE),
+                                  public_key,
+                                  private_key);
+    return rv;
+}
+
+CK_RV rsa_encrypt(CK_SESSION_HANDLE session,
+                                CK_OBJECT_HANDLE key,
+                                CK_MECHANISM_TYPE mechanism,
+                                CK_BYTE_PTR data,
+                                CK_ULONG data_length,
+                                CK_BYTE_PTR ciphertext,
+                                CK_ULONG_PTR ciphertext_length) {
+    CK_RV rv;
+    CK_MECHANISM mech;
+
+    mech.mechanism = mechanism;
+    mech.ulParameterLen = 0;
+    mech.pParameter = NULL;
+
+    rv = funcs->C_EncryptInit(session, &mech, key);
+    if (rv != CKR_OK) {
+        return !CKR_OK;
+    }
+
+    rv = funcs->C_Encrypt(session, data, data_length, ciphertext, ciphertext_length);
+    return rv;
+}

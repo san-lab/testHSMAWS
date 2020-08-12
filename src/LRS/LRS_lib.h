@@ -29,4 +29,17 @@ CK_RV generate_aes_key(CK_SESSION_HANDLE session,
                        CK_ULONG key_length_bytes,
                        CK_OBJECT_HANDLE_PTR key);
 
+CK_RV generate_rsa_keypair(CK_SESSION_HANDLE session,
+                           CK_ULONG key_length_bits,
+                           CK_OBJECT_HANDLE_PTR public_key,
+                           CK_OBJECT_HANDLE_PTR private_key);
+
+CK_RV rsa_encrypt(CK_SESSION_HANDLE session,
+                                CK_OBJECT_HANDLE key,
+                                CK_MECHANISM_TYPE mechanism,
+                                CK_BYTE_PTR data,
+                                CK_ULONG data_length,
+                                CK_BYTE_PTR ciphertext,
+                                CK_ULONG_PTR ciphertext_length);
+
 #endif //PKCS11_EXAMPLES_ENCRYPT_AES_H
