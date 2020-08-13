@@ -75,60 +75,6 @@ RSA *read_RSA_PUBKEY(char *path)
     return rsa;
 }
 
-int import_RSA_PUBKEY(CK_SESSION_HANDLE session,
-                        char *path,
-                        CK_OBJECT_HANDLE_PTR public_key) {
-    CK_RV rv;
-    int rc = 1;
-
-    /* Read the pem file into an RSA struct to we can access the exponent and modulus */
-    RSA *key = read_RSA_PUBKEY(path);
-    if (NULL==key) {
-        fprintf(stderr, "Could not read the RSA key\n");
-        return rc;
-    }
-
-    CK_ULONG pub_exp_len = BN_num_bytes(key->e);
-    CK_BYTE *pub_exp = malloc(pub_exp_len);
-    if (pub_exp == NULL) {
-        fprintf(stderr, "Failed to allocate memory for exponent: %s\n", strerror(errno));
-        return rc;
-    }
-    BN_bn2bin(key->e, pub_exp);
-
-    CK_ULONG modulus_len = BN_num_bytes(key->n);
-    CK_BYTE *modulus = malloc(modulus_len);
-    if (modulus == NULL) {
-        fprintf(stderr, "Failed to allocate memory for modulus: %s\n", strerror(errno));
-        return rc;
-    }
-    BN_bn2bin(key->n, modulus);
-
-    RSA_free(key);
-
-    /* Using the modulus and exponent from above, we can "import" the key by creating
-     * an object with the appropriate attributes.
-     */
-    CK_OBJECT_CLASS pub_key_class = CKO_PUBLIC_KEY;
-    CK_KEY_TYPE key_type = CKK_RSA;
-
-    CK_ATTRIBUTE pub_tmpl[] = {
-            {CKA_KEY_TYPE,        &key_type,      sizeof(key_type)},
-            {CKA_CLASS,           &pub_key_class, sizeof(pub_key_class)},
-            {CKA_MODULUS,         modulus,        modulus_len},
-            {CKA_PUBLIC_EXPONENT, pub_exp,        pub_exp_len},
-            {CKA_TOKEN,           &true_val,      sizeof(CK_BBOOL)},
-            {CKA_ENCRYPT,         &true_val,      sizeof(CK_BBOOL)}
-    };
-    rv = funcs->C_CreateObject(session, pub_tmpl, sizeof(pub_tmpl) / sizeof(CK_ATTRIBUTE), public_key);
-    if (CKR_OK != rv) {
-        fprintf(stderr, "Failed to create object %lu\n", rv);
-        return rc;
-    }
-
-    return rv;
-}
-
 /**
  * Read an RSA private key into an RSA structure.
  * @param path
@@ -159,18 +105,71 @@ RSA *read_RSA_PRIVKEY(char *path)
     return rsa;
 }
 
-int import_RSA_PRIVKEY(CK_SESSION_HANDLE session,
-                        char *path,
+int import_RSA_KeyPair(CK_SESSION_HANDLE session,
+                        char *path_pubKey,
+                        char *path_privKey,
+                        CK_OBJECT_HANDLE_PTR public_key,
                         CK_OBJECT_HANDLE_PTR private_key) {
     CK_RV rv;
     int rc = 1;
+    CK_MECHANISM mech;
+
+    mech.mechanism = CKM_RSA_PKCS_KEY_PAIR_GEN;
+    mech.ulParameterLen = 0;
+    mech.pParameter = NULL;
 
     /* Read the pem file into an RSA struct to we can access the exponent and modulus */
-    RSA *key = read_RSA_PRIVKEY(path);
+    RSA *key = read_RSA_PUBKEY(path_pubKey);
     if (NULL==key) {
         fprintf(stderr, "Could not read the RSA key\n");
         return rc;
     }
+
+    CK_ULONG pub_exp_len = BN_num_bytes(key->e);
+    CK_BYTE *pub_exp = malloc(pub_exp_len);
+    if (pub_exp == NULL) {
+        fprintf(stderr, "Failed to allocate memory for exponent: %s\n", strerror(errno));
+        return rc;
+    }
+    BN_bn2bin(key->e, pub_exp);
+
+    CK_ULONG modulus_len = BN_num_bytes(key->n);
+    CK_BYTE *modulus = malloc(modulus_len);
+    if (modulus == NULL) {
+        fprintf(stderr, "Failed to allocate memory for modulus: %s\n", strerror(errno));
+        return rc;
+    }
+    BN_bn2bin(key->n, modulus);
+
+    RSA_free(key);
+
+    /* Using the modulus and exponent from above, we can "import" the key by creating
+     * an object with the appropriate attributes.
+     */
+    CK_KEY_TYPE key_type = CKK_RSA;
+
+    CK_ATTRIBUTE pub_tmpl[] = {
+            {CKA_KEY_TYPE,        &key_type,      sizeof(key_type)},
+            {CKA_MODULUS,         modulus,        modulus_len},
+            {CKA_PUBLIC_EXPONENT, pub_exp,        pub_exp_len},
+            {CKA_TOKEN,           &true_val,      sizeof(CK_BBOOL)},
+            {CKA_ENCRYPT,         &true_val,      sizeof(CK_BBOOL)}
+    };
+
+    /* Read the pem file into an RSA struct to we can access the exponent and modulus */
+    RSA *key = read_RSA_PRIVKEY(path_privKey);
+    if (NULL==key) {
+        fprintf(stderr, "Could not read the RSA key\n");
+        return rc;
+    }
+
+    CK_ULONG modulus_len = BN_num_bytes(key->n);
+    CK_BYTE *modulus = malloc(modulus_len);
+    if (modulus == NULL) {
+        fprintf(stderr, "Failed to allocate memory for modulus: %s\n", strerror(errno));
+        return rc;
+    }
+    BN_bn2bin(key->n, modulus);
 
     CK_ULONG pub_exp_len = BN_num_bytes(key->e);
     CK_BYTE *pub_exp = malloc(pub_exp_len);
@@ -188,36 +187,78 @@ int import_RSA_PRIVKEY(CK_SESSION_HANDLE session,
     }
     BN_bn2bin(key->d, priv_exp);
 
-    CK_ULONG modulus_len = BN_num_bytes(key->n);
-    CK_BYTE *modulus = malloc(modulus_len);
-    if (modulus == NULL) {
-        fprintf(stderr, "Failed to allocate memory for modulus: %s\n", strerror(errno));
+    CK_ULONG prime_1_len = BN_num_bytes(key->p);
+    CK_BYTE *prime_1 = malloc(prime_1_len);
+    if (prime_1 == NULL) {
+        fprintf(stderr, "Failed to allocate memory for prime_1 exponent: %s\n", strerror(errno));
         return rc;
     }
-    BN_bn2bin(key->n, modulus);
+    BN_bn2bin(key->p, prime_1);
+
+    CK_ULONG prime_2_len = BN_num_bytes(key->q);
+    CK_BYTE *prime_2 = malloc(prime_2_len);
+    if (prime_2 == NULL) {
+        fprintf(stderr, "Failed to allocate memory for prime_2 exponent: %s\n", strerror(errno));
+        return rc;
+    }
+    BN_bn2bin(key->q, prime_2);
+
+    CK_ULONG exp_1_len = BN_num_bytes(key->dmp1);
+    CK_BYTE *exp_1 = malloc(exp_1_len);
+    if (exp_1 == NULL) {
+        fprintf(stderr, "Failed to allocate memory for exp_1 exponent: %s\n", strerror(errno));
+        return rc;
+    }
+    BN_bn2bin(key->dmp1, exp_1);
+
+    CK_ULONG exp_2_len = BN_num_bytes(key->dmq1);
+    CK_BYTE *exp_2 = malloc(exp_2_len);
+    if (exp_2 == NULL) {
+        fprintf(stderr, "Failed to allocate memory for exp_2 exponent: %s\n", strerror(errno));
+        return rc;
+    }
+    BN_bn2bin(key->dmq1, exp_2);
+
+    CK_ULONG coefficient_len = BN_num_bytes(key->iqmp);
+    CK_BYTE *coefficient = malloc(coefficient_len);
+    if (coefficient == NULL) {
+        fprintf(stderr, "Failed to allocate memory for coefficient exponent: %s\n", strerror(errno));
+        return rc;
+    }
+    BN_bn2bin(key->iqmp, coefficient);
 
     RSA_free(key);
 
     /* Using the modulus and exponent from above, we can "import" the key by creating
      * an object with the appropriate attributes.
      */
-    CK_OBJECT_CLASS priv_key_class = CKO_PRIVATE_KEY;
     CK_KEY_TYPE key_type = CKK_RSA;
 
     CK_ATTRIBUTE priv_tmpl[] = {
             {CKA_KEY_TYPE,        &key_type,      sizeof(key_type)},
-            {CKA_CLASS,           &priv_key_class,sizeof(priv_key_class)},
             {CKA_MODULUS,         modulus,        modulus_len},
             {CKA_PUBLIC_EXPONENT, pub_exp,        pub_exp_len},
             {CKA_PRIVATE_EXPONENT,priv_exp,       priv_exp_len},
+            {CKA_PRIME_1,         prime_1,        sizeof(prime_1)},
+            {CKA_PRIME_2,         prime_2,        sizeof(prime_2)},
+            {CKA_EXPONENT_1,      exp_1,          sizeof(exp_1)},
+            {CKA_EXPONENT_2,      exp_2,          sizeof(exp_2)},
+            {CKA_COEFFICIENT,     coefficient,    sizeof(coefficient)}
             {CKA_TOKEN,           &true_val,      sizeof(CK_BBOOL)},
             {CKA_DECRYPT,         &true_val,      sizeof(CK_BBOOL)}
     };
-    rv = funcs->C_CreateObject(session, priv_tmpl, sizeof(priv_tmpl) / sizeof(CK_ATTRIBUTE), private_key);
-    if (CKR_OK != rv) {
-        fprintf(stderr, "Failed to create object %lu\n", rv);
-        return rc;
-    }
+    rv = funcs->C_GenerateKeyPair(session,
+                                  &mech,
+                                  pub_tmpl, sizeof(pub_tmpl) / sizeof(CK_ATTRIBUTE),
+                                  priv_tmpl, sizeof(priv_tmpl) / sizeof(CK_ATTRIBUTE),
+                                  public_key,
+                                  private_key);
+    return rv;
+    //rv = funcs->C_CreateObject(session, priv_tmpl, sizeof(priv_tmpl) / sizeof(CK_ATTRIBUTE), private_key);
+    //if (CKR_OK != rv) {
+    //    fprintf(stderr, "Failed to create object %lu\n", rv);
+    //    return rc;
+    //}
 
     return rv;
 }
