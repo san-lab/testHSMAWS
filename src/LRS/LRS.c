@@ -22,7 +22,7 @@
  * Encrypt and decrypt a string using AES CBC.
  * @param session Active PKCS#11 session
  */
-CK_RV aes_cbc_sample(CK_SESSION_HANDLE session) {
+CK_RV aes_encrypt_decrypt(CK_SESSION_HANDLE session) {
     CK_RV rv;
 
     // Generate a 256 bit AES key.
@@ -83,6 +83,43 @@ CK_RV aes_cbc_sample(CK_SESSION_HANDLE session) {
     printf("Ciphertext: ");
     print_bytes_as_hex(ciphertext, ciphertext_length);
     printf("Ciphertext length: %lu\n", ciphertext_length);
+
+    //**********************************************************************************************
+    // Decrypt
+    //**********************************************************************************************    
+
+    rv = funcs->C_DecryptInit(session, &mech, aes_key);
+    if (CKR_OK != rv) {
+        printf("Decryption Init failed: %lu\n", rv);
+        return rv;
+    }
+
+    // Determine how much memory is required to hold the decrypted text.
+    CK_ULONG decrypted_ciphertext_length = 0;
+    rv = funcs->C_Decrypt(session, ciphertext, ciphertext_length, NULL, &decrypted_ciphertext_length);
+    if (CKR_OK != rv) {
+        printf("Decryption failed: %lu\n", rv);
+        goto done;
+    }
+
+    // Allocate memory for the decrypted ciphertext.
+    decrypted_ciphertext = malloc(decrypted_ciphertext_length + 1); //We want to null terminate the raw chars later
+    if (NULL == decrypted_ciphertext) {
+        rv = 1;
+        printf("Could not allocate memory for decrypted ciphertext\n");
+        goto done;
+    }
+
+    // Decrypt the ciphertext.
+    rv = funcs->C_Decrypt(session, ciphertext, ciphertext_length, decrypted_ciphertext, &decrypted_ciphertext_length);
+    if (CKR_OK != rv) {
+        printf("Decryption failed: %lu\n", rv);
+        goto done;
+    }
+    decrypted_ciphertext[decrypted_ciphertext_length] = 0; // Turn the chars into a C-String via null termination
+
+    printf("Decrypted ciphertext: %s\n", decrypted_ciphertext);
+    printf("Decrypted ciphertext length: %lu\n", decrypted_ciphertext_length);
 
 done:
     if (NULL != decrypted_ciphertext) {
@@ -176,6 +213,81 @@ CK_RV rsa_encrypt_decrypt(CK_SESSION_HANDLE session) {
     return CKR_OK;
 }
 
+CK_RV rsa_encrypt_decrypt_imported(CK_SESSION_HANDLE session, 
+                                    CK_OBJECT_HANDLE encrypting_public_key, 
+                                    CK_OBJECT_HANDLE decrypting_private_key) {
+
+    CK_BYTE_PTR data = "Data to test with imported keys";
+    CK_ULONG data_length = strlen(data);
+
+    CK_BYTE ciphertext [MAX_SIGNATURE_LENGTH];
+    CK_ULONG ciphertext_length = MAX_SIGNATURE_LENGTH;
+
+    // Set the PKCS11 signature mechanism type.
+    CK_MECHANISM_TYPE mechanism = CKM_RSA_PKCS;
+
+    rv = rsa_encrypt(session, encrypting_public_key, mechanism,
+                            data, data_length, ciphertext, &ciphertext_length);
+    if (rv == CKR_OK) {
+        unsigned char *hex_ciphertext = NULL;
+        bytes_to_new_hexstring(ciphertext, ciphertext_length, &hex_ciphertext);
+        if (!hex_ciphertext) {
+            printf("Could not allocate hex array\n");
+            return 1;
+        }
+
+        printf("Data: %s\n", data);
+        printf("Ciphertext: %s\n", hex_ciphertext);
+        free(hex_ciphertext);
+        hex_ciphertext = NULL;
+    } else {
+        printf("Ciphertext generation failed: %lu\n", rv);
+        return rv;
+    }
+
+    ////////DECRYPT///////
+
+    CK_MECHANISM mech;
+
+    mech.mechanism = mechanism;
+    mech.ulParameterLen = 0;
+    mech.pParameter = NULL;
+
+    rv = funcs->C_DecryptInit(session, &mech, decrypting_private_key);
+    if (CKR_OK != rv) {
+        printf("Decryption Init failed: %lu\n", rv);
+        return rv;
+    }
+
+    CK_ULONG decrypted_ciphertext_length = 0;
+    rv = funcs->C_Decrypt(session, ciphertext, ciphertext_length, NULL, &decrypted_ciphertext_length);
+    if (CKR_OK != rv) {
+        printf("Decryption failed: %lu\n", rv);
+        return 1;
+    }
+
+    // Allocate memory for the decrypted ciphertext.
+    CK_BYTE_PTR decrypted_ciphertext = NULL;
+    decrypted_ciphertext = malloc(decrypted_ciphertext_length + 1); //We want to null terminate the raw chars later
+    if (NULL == decrypted_ciphertext) {
+        rv = 1;
+        printf("Could not allocate memory for decrypted ciphertext\n");
+        return 1;
+    }
+
+    rv = rsa_decrypt(session, decrypting_private_key, mechanism,
+                          ciphertext, ciphertext_length, decrypted_ciphertext, &decrypted_ciphertext_length);
+    if (CKR_OK != rv) {
+        printf("Decryption failed: %lu\n", rv);
+    }
+    decrypted_ciphertext[decrypted_ciphertext_length] = 0; // Turn the chars into a C-String via null termination
+
+    printf("Decrypted ciphertext: %s\n", decrypted_ciphertext);
+    printf("Decrypted ciphertext length: %lu\n", decrypted_ciphertext_length);
+
+    return CKR_OK;
+}
+
 int main(int argc, char **argv) {
     CK_RV rv;
     CK_SESSION_HANDLE session;
@@ -195,13 +307,37 @@ int main(int argc, char **argv) {
     }
 
     printf("\nOnly Encrypt AES\n");
-    rv = aes_cbc_sample(session);
+    rv = aes_encrypt_decrypt(session);
     if (CKR_OK != rv) {
         return rv;
     }
 
-    printf("Encrypt with RSA\n");
+    printf("Encrypt/Decrypt with RSA\n");
     rv = rsa_encrypt_decrypt(session);
+    if (rv != CKR_OK)
+        return rv;
+
+    CK_OBJECT_HANDLE encrypting_public_key = CK_INVALID_HANDLE;
+    CK_OBJECT_HANDLE decrypting_private_key = CK_INVALID_HANDLE;
+
+    char paths[2][40] = 
+    {
+        "./rsa.public",
+        "./rsa.private"
+    };
+
+    printf("Import RSA pubKey");
+    rv = import_RSA_PUBKEY(session, &paths[0],encrypting_public_key);
+    if (rv != CKR_OK)
+        return rv;
+
+    printf("Import RSA privKey");
+    rv = import_RSA_PRIVKEY(session, &paths[1],decrypting_private_key);
+    if (rv != CKR_OK)
+        return rv;
+
+    printf("Encrypt/Decrypt with imported RSA keys \n");
+    rv = rsa_encrypt_decrypt_imported(session, encrypting_public_key, decrypting_private_key);
     if (rv != CKR_OK)
         return rv;
 

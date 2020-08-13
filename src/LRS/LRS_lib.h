@@ -41,6 +41,7 @@ CK_RV rsa_encrypt(CK_SESSION_HANDLE session,
                                 CK_ULONG data_length,
                                 CK_BYTE_PTR ciphertext,
                                 CK_ULONG_PTR ciphertext_length);
+
 CK_RV rsa_decrypt(CK_SESSION_HANDLE session,
                                 CK_OBJECT_HANDLE key,
                                 CK_MECHANISM_TYPE mechanism,
@@ -48,5 +49,17 @@ CK_RV rsa_decrypt(CK_SESSION_HANDLE session,
                                 CK_ULONG ciphertext_length,
                                 CK_BYTE_PTR data,
                                 CK_ULONG_PTR data_length);
+
+RSA *read_RSA_PUBKEY(char *path);
+
+int import_RSA_PUBKEY(CK_SESSION_HANDLE session,
+                        char *path,
+                        CK_OBJECT_HANDLE_PTR public_key);
+
+RSA *read_RSA_PRIVKEY(char *path);
+
+int import_RSA_PRIVKEY(CK_SESSION_HANDLE session,
+                        char *path,
+                        CK_OBJECT_HANDLE_PTR private_key);
 
 #endif //PKCS11_EXAMPLES_ENCRYPT_AES_H
