@@ -167,7 +167,6 @@ CK_RV rsa_encrypt_decrypt(CK_SESSION_HANDLE session) {
                           ciphertext, ciphertext_length, decrypted_ciphertext, &decrypted_ciphertext_length);
     if (CKR_OK != rv) {
         printf("Decryption failed: %lu\n", rv);
-        goto done;
     }
     decrypted_ciphertext[decrypted_ciphertext_length] = 0; // Turn the chars into a C-String via null termination
 
