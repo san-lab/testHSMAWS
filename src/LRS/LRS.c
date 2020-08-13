@@ -328,7 +328,7 @@ int main(int argc, char **argv) {
     };
 
     printf("Import RSA pubKey and privKey\n");
-    rv = int import_RSA_KeyPair(session, paths[0], paths[1], enc_public_key, dec_private_key);
+    rv = import_RSA_KeyPair(session, paths[0], paths[1], enc_public_key, dec_private_key);
     if (rv != CKR_OK)
         return rv;
 
