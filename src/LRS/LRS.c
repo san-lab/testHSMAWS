@@ -165,21 +165,14 @@ CK_RV rsa_encrypt_decrypt(CK_SESSION_HANDLE session) {
 
     rv = rsa_decrypt(session, decrypting_private_key, mechanism,
                           ciphertext, ciphertext_length, decrypted_ciphertext, &decrypted_ciphertext_length);
-    if (rv == CKR_OK) {
-        unsigned char *hex_plaintext = NULL;
-        bytes_to_new_hexstring(decrypted_ciphertext, decrypted_ciphertext_length, &hex_plaintext);
-        if (!hex_plaintext) {
-            printf("Could not allocate hex array\n");
-            return 1;
-        }
-
-        printf("Plaintext decrypted: %s\n", hex_plaintext);
-        free(hex_plaintext);
-        hex_plaintext = NULL;
-    } else {
+    if (CKR_OK != rv) {
         printf("Decryption failed: %lu\n", rv);
-        return rv;
+        goto done;
     }
+    decrypted_ciphertext[decrypted_ciphertext_length] = 0; // Turn the chars into a C-String via null termination
+
+    printf("Decrypted ciphertext: %s\n", decrypted_ciphertext);
+    printf("Decrypted ciphertext length: %lu\n", decrypted_ciphertext_length);
 
     return CKR_OK;
 }
