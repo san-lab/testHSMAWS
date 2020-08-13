@@ -157,93 +157,93 @@ int import_RSA_KeyPair(CK_SESSION_HANDLE session,
     };
 
     /* Read the pem file into an RSA struct to we can access the exponent and modulus */
-    RSA *key = read_RSA_PRIVKEY(path_privKey);
+    RSA *key_priv = read_RSA_PRIVKEY(path_privKey);
     if (NULL==key) {
         fprintf(stderr, "Could not read the RSA key\n");
         return rc;
     }
 
-    CK_ULONG modulus_len = BN_num_bytes(key->n);
-    CK_BYTE *modulus = malloc(modulus_len);
-    if (modulus == NULL) {
+    CK_ULONG modulus_len_priv = BN_num_bytes(key_priv->n);
+    CK_BYTE *modulus_priv = malloc(modulus_len_priv);
+    if (modulus_priv == NULL) {
         fprintf(stderr, "Failed to allocate memory for modulus: %s\n", strerror(errno));
         return rc;
     }
-    BN_bn2bin(key->n, modulus);
+    BN_bn2bin(key_priv->n, modulus_priv);
 
-    CK_ULONG pub_exp_len = BN_num_bytes(key->e);
-    CK_BYTE *pub_exp = malloc(pub_exp_len);
-    if (pub_exp == NULL) {
+    CK_ULONG pub_exp_len_priv = BN_num_bytes(key_priv->e);
+    CK_BYTE *pub_exp_priv = malloc(pub_exp_len_priv);
+    if (pub_exp_priv == NULL) {
         fprintf(stderr, "Failed to allocate memory for public exponent: %s\n", strerror(errno));
         return rc;
     }
-    BN_bn2bin(key->e, pub_exp);
+    BN_bn2bin(key_priv->e, pub_exp_priv);
 
-    CK_ULONG priv_exp_len = BN_num_bytes(key->d);
+    CK_ULONG priv_exp_len = BN_num_bytes(key_priv->d);
     CK_BYTE *priv_exp = malloc(priv_exp_len);
     if (priv_exp == NULL) {
         fprintf(stderr, "Failed to allocate memory for private exponent: %s\n", strerror(errno));
         return rc;
     }
-    BN_bn2bin(key->d, priv_exp);
+    BN_bn2bin(key_priv->d, priv_exp);
 
-    CK_ULONG prime_1_len = BN_num_bytes(key->p);
+    CK_ULONG prime_1_len = BN_num_bytes(key_priv->p);
     CK_BYTE *prime_1 = malloc(prime_1_len);
     if (prime_1 == NULL) {
         fprintf(stderr, "Failed to allocate memory for prime_1 exponent: %s\n", strerror(errno));
         return rc;
     }
-    BN_bn2bin(key->p, prime_1);
+    BN_bn2bin(key_priv->p, prime_1);
 
-    CK_ULONG prime_2_len = BN_num_bytes(key->q);
+    CK_ULONG prime_2_len = BN_num_bytes(key_priv->q);
     CK_BYTE *prime_2 = malloc(prime_2_len);
     if (prime_2 == NULL) {
         fprintf(stderr, "Failed to allocate memory for prime_2 exponent: %s\n", strerror(errno));
         return rc;
     }
-    BN_bn2bin(key->q, prime_2);
+    BN_bn2bin(key_priv->q, prime_2);
 
-    CK_ULONG exp_1_len = BN_num_bytes(key->dmp1);
+    CK_ULONG exp_1_len = BN_num_bytes(key_priv->dmp1);
     CK_BYTE *exp_1 = malloc(exp_1_len);
     if (exp_1 == NULL) {
         fprintf(stderr, "Failed to allocate memory for exp_1 exponent: %s\n", strerror(errno));
         return rc;
     }
-    BN_bn2bin(key->dmp1, exp_1);
+    BN_bn2bin(key_priv->dmp1, exp_1);
 
-    CK_ULONG exp_2_len = BN_num_bytes(key->dmq1);
+    CK_ULONG exp_2_len = BN_num_bytes(key_priv->dmq1);
     CK_BYTE *exp_2 = malloc(exp_2_len);
     if (exp_2 == NULL) {
         fprintf(stderr, "Failed to allocate memory for exp_2 exponent: %s\n", strerror(errno));
         return rc;
     }
-    BN_bn2bin(key->dmq1, exp_2);
+    BN_bn2bin(key_priv->dmq1, exp_2);
 
-    CK_ULONG coefficient_len = BN_num_bytes(key->iqmp);
+    CK_ULONG coefficient_len = BN_num_bytes(key_priv->iqmp);
     CK_BYTE *coefficient = malloc(coefficient_len);
     if (coefficient == NULL) {
         fprintf(stderr, "Failed to allocate memory for coefficient exponent: %s\n", strerror(errno));
         return rc;
     }
-    BN_bn2bin(key->iqmp, coefficient);
+    BN_bn2bin(key_priv->iqmp, coefficient);
 
     RSA_free(key);
 
     /* Using the modulus and exponent from above, we can "import" the key by creating
      * an object with the appropriate attributes.
      */
-    CK_KEY_TYPE key_type = CKK_RSA;
+    CK_KEY_TYPE key_type_priv = CKK_RSA;
 
     CK_ATTRIBUTE priv_tmpl[] = {
-            {CKA_KEY_TYPE,        &key_type,      sizeof(key_type)},
-            {CKA_MODULUS,         modulus,        modulus_len},
-            {CKA_PUBLIC_EXPONENT, pub_exp,        pub_exp_len},
+            {CKA_KEY_TYPE,        &key_type_priv, sizeof(key_type_priv)},
+            {CKA_MODULUS,         modulus_priv,   modulus_len_priv},
+            {CKA_PUBLIC_EXPONENT, pub_exp_priv,   pub_exp_len_priv},
             {CKA_PRIVATE_EXPONENT,priv_exp,       priv_exp_len},
-            {CKA_PRIME_1,         prime_1,        sizeof(prime_1)},
-            {CKA_PRIME_2,         prime_2,        sizeof(prime_2)},
-            {CKA_EXPONENT_1,      exp_1,          sizeof(exp_1)},
-            {CKA_EXPONENT_2,      exp_2,          sizeof(exp_2)},
-            {CKA_COEFFICIENT,     coefficient,    sizeof(coefficient)}
+            {CKA_PRIME_1,         prime_1,        prime_1_len},
+            {CKA_PRIME_2,         prime_2,        prime_2_len},
+            {CKA_EXPONENT_1,      exp_1,          exp_1_len},
+            {CKA_EXPONENT_2,      exp_2,          exp_2_len},
+            {CKA_COEFFICIENT,     coefficient,    coefficient_len}
             {CKA_TOKEN,           &true_val,      sizeof(CK_BBOOL)},
             {CKA_DECRYPT,         &true_val,      sizeof(CK_BBOOL)}
     };
