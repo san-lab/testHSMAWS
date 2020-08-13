@@ -146,10 +146,8 @@ int import_RSA_KeyPair(CK_SESSION_HANDLE session,
     /* Using the modulus and exponent from above, we can "import" the key by creating
      * an object with the appropriate attributes.
      */
-    CK_KEY_TYPE key_type = CKK_RSA;
 
     CK_ATTRIBUTE pub_tmpl[] = {
-            {CKA_KEY_TYPE,        &key_type,      sizeof(key_type)},
             {CKA_MODULUS,         modulus,        modulus_len},
             {CKA_PUBLIC_EXPONENT, pub_exp,        pub_exp_len},
             {CKA_TOKEN,           &true_val,      sizeof(CK_BBOOL)},
@@ -158,7 +156,7 @@ int import_RSA_KeyPair(CK_SESSION_HANDLE session,
 
     /* Read the pem file into an RSA struct to we can access the exponent and modulus */
     RSA *key_priv = read_RSA_PRIVKEY(path_privKey);
-    if (NULL==key) {
+    if (NULL==key_priv) {
         fprintf(stderr, "Could not read the RSA key\n");
         return rc;
     }
@@ -232,10 +230,8 @@ int import_RSA_KeyPair(CK_SESSION_HANDLE session,
     /* Using the modulus and exponent from above, we can "import" the key by creating
      * an object with the appropriate attributes.
      */
-    CK_KEY_TYPE key_type_priv = CKK_RSA;
 
     CK_ATTRIBUTE priv_tmpl[] = {
-            {CKA_KEY_TYPE,        &key_type_priv, sizeof(key_type_priv)},
             {CKA_MODULUS,         modulus_priv,   modulus_len_priv},
             {CKA_PUBLIC_EXPONENT, pub_exp_priv,   pub_exp_len_priv},
             {CKA_PRIVATE_EXPONENT,priv_exp,       priv_exp_len},
