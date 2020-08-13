@@ -219,6 +219,7 @@ CK_RV rsa_encrypt_decrypt_imported(CK_SESSION_HANDLE session,
 
     CK_BYTE_PTR data = "Data to test with imported keys";
     CK_ULONG data_length = strlen(data);
+    CK_RV rv;
 
     CK_BYTE ciphertext [MAX_SIGNATURE_LENGTH];
     CK_ULONG ciphertext_length = MAX_SIGNATURE_LENGTH;
@@ -327,12 +328,12 @@ int main(int argc, char **argv) {
     };
 
     printf("Import RSA pubKey");
-    rv = import_RSA_PUBKEY(session, &paths[0],encrypting_public_key);
+    rv = import_RSA_PUBKEY(session, paths[0],encrypting_public_key);
     if (rv != CKR_OK)
         return rv;
 
     printf("Import RSA privKey");
-    rv = import_RSA_PRIVKEY(session, &paths[1],decrypting_private_key);
+    rv = import_RSA_PRIVKEY(session, paths[1],decrypting_private_key);
     if (rv != CKR_OK)
         return rv;
 

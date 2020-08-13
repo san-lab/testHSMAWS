@@ -20,6 +20,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+#include <openssl/pem.h>
+#include <openssl/err.h>
+
 #include <common.h>
 
 #define AES_GCM_IV_SIZE 12
