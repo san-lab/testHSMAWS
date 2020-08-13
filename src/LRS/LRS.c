@@ -167,7 +167,7 @@ CK_RV rsa_encrypt_decrypt(CK_SESSION_HANDLE session) {
                           ciphertext, ciphertext_length, decrypted_ciphertext, &decrypted_ciphertext_length);
     if (rv == CKR_OK) {
         unsigned char *hex_plaintext = NULL;
-        bytes_to_new_hexstring(ciphertext, ciphertext_length, &hex_plaintext);
+        bytes_to_new_hexstring(decrypted_ciphertext, decrypted_ciphertext_length, &hex_plaintext);
         if (!hex_plaintext) {
             printf("Could not allocate hex array\n");
             return 1;
