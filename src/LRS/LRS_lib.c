@@ -100,16 +100,6 @@ CK_RV rsa_encrypt(CK_SESSION_HANDLE session,
                                 CK_BYTE_PTR ciphertext,
                                 CK_ULONG_PTR ciphertext_length) {
     CK_RV rv;
-    CK_MECHANISM mech;
-
-    mech.mechanism = mechanism;
-    mech.ulParameterLen = 0;
-    mech.pParameter = NULL;
-
-    rv = funcs->C_EncryptInit(session, &mech, key);
-    if (rv != CKR_OK) {
-        return !CKR_OK;
-    }
 
     rv = funcs->C_Encrypt(session, data, data_length, ciphertext, ciphertext_length);
     return rv;
