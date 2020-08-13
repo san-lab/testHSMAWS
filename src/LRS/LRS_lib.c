@@ -109,10 +109,12 @@ int import_RSA_PUBKEY(CK_SESSION_HANDLE session,
     /* Using the modulus and exponent from above, we can "import" the key by creating
      * an object with the appropriate attributes.
      */
+    CK_OBJECT_CLASS pub_key_class = CKO_PUBLIC_KEY;
     CK_KEY_TYPE key_type = CKK_RSA;
 
     CK_ATTRIBUTE pub_tmpl[] = {
             {CKA_KEY_TYPE,        &key_type,      sizeof(key_type)},
+            {CKA_CLASS,           &pub_key_class, sizeof(pub_key_class)},
             {CKA_MODULUS,         modulus,        modulus_len},
             {CKA_PUBLIC_EXPONENT, pub_exp,        pub_exp_len},
             {CKA_TOKEN,           &true_val,      sizeof(CK_BBOOL)},
@@ -199,10 +201,12 @@ int import_RSA_PRIVKEY(CK_SESSION_HANDLE session,
     /* Using the modulus and exponent from above, we can "import" the key by creating
      * an object with the appropriate attributes.
      */
+    CK_OBJECT_CLASS priv_key_class = CKO_PRIVATE_KEY;
     CK_KEY_TYPE key_type = CKK_RSA;
 
     CK_ATTRIBUTE priv_tmpl[] = {
             {CKA_KEY_TYPE,        &key_type,      sizeof(key_type)},
+            {CKA_CLASS,           &priv_key_class,sizeof(priv_key_class)},
             {CKA_MODULUS,         modulus,        modulus_len},
             {CKA_PUBLIC_EXPONENT, pub_exp,        pub_exp_len},
             {CKA_PRIVATE_EXPONENT,priv_exp,       priv_exp_len},
