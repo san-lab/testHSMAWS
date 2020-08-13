@@ -139,19 +139,20 @@ CK_RV rsa_encrypt_decrypt(CK_SESSION_HANDLE session) {
     rv = funcs->C_Decrypt(session, ciphertext, ciphertext_length, NULL, &decrypted_ciphertext_length);
     if (CKR_OK != rv) {
         printf("Decryption failed: %lu\n", rv);
-        goto done;
+        return 1;
     }
 
     // Allocate memory for the decrypted ciphertext.
+    CK_BYTE_PTR decrypted_ciphertext = NULL;
     decrypted_ciphertext = malloc(decrypted_ciphertext_length + 1); //We want to null terminate the raw chars later
     if (NULL == decrypted_ciphertext) {
         rv = 1;
         printf("Could not allocate memory for decrypted ciphertext\n");
-        goto done;
+        return 1;
     }
 
     rv = rsa_decrypt(session, decrypting_private_key, mechanism,
-                          ciphertext, ciphertext_length, decrypted_ciphertext, decrypted_ciphertext_length);
+                          ciphertext, ciphertext_length, decrypted_ciphertext, &decrypted_ciphertext_length);
     if (rv == CKR_OK) {
         unsigned char *hex_plaintext = NULL;
         bytes_to_new_hexstring(ciphertext, ciphertext_length, &hex_plaintext);
@@ -196,7 +197,7 @@ int main(int argc, char **argv) {
     }
 
     printf("Encrypt with RSA\n");
-    rv = rsa_encrypt(session);
+    rv = rsa_encrypt_decrypt(session);
     if (rv != CKR_OK)
         return rv;
 
