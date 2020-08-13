@@ -153,7 +153,7 @@ int import_RSA_KeyPair(CK_SESSION_HANDLE session,
             {CKA_MODULUS,         modulus,        modulus_len},
             {CKA_PUBLIC_EXPONENT, pub_exp,        pub_exp_len},
             {CKA_TOKEN,           &true_val,      sizeof(CK_BBOOL)},
-            {CKA_ENCRYPT,         &true_val,      sizeof(CK_BBOOL)}
+            {CKA_ENCRYPT,         &true_val,      sizeof(CK_BBOOL)},
     };
 
     /* Read the pem file into an RSA struct to we can access the exponent and modulus */
@@ -243,9 +243,9 @@ int import_RSA_KeyPair(CK_SESSION_HANDLE session,
             {CKA_PRIME_2,         prime_2,        prime_2_len},
             {CKA_EXPONENT_1,      exp_1,          exp_1_len},
             {CKA_EXPONENT_2,      exp_2,          exp_2_len},
-            {CKA_COEFFICIENT,     coefficient,    coefficient_len}
+            {CKA_COEFFICIENT,     coefficient,    coefficient_len},
             {CKA_TOKEN,           &true_val,      sizeof(CK_BBOOL)},
-            {CKA_DECRYPT,         &true_val,      sizeof(CK_BBOOL)}
+            {CKA_DECRYPT,         &true_val,      sizeof(CK_BBOOL)},
     };
     rv = funcs->C_GenerateKeyPair(session,
                                   &mech,
