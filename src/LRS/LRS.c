@@ -135,7 +135,7 @@ CK_RV rsa_encrypt_decrypt(CK_SESSION_HANDLE session) {
 
     ////////DECRYPT///////
 
-    rv = funcs->C_DecryptInit(session, mechanism, decrypting_private_key);
+    rv = funcs->C_DecryptInit(session, &mechanism, decrypting_private_key);
     if (CKR_OK != rv) {
         printf("Decryption Init failed: %lu\n", rv);
         return rv;
