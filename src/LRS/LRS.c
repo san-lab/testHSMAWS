@@ -99,7 +99,7 @@ CK_RV rsa_encrypt_encrypt(CK_SESSION_HANDLE session) {
     CK_OBJECT_HANDLE encrypting_public_key = CK_INVALID_HANDLE;
     CK_OBJECT_HANDLE decrypting_private_key = CK_INVALID_HANDLE;
 
-    CK_RV rv = generate_rsa_keypair(session, 2048, &decrypting_public_key, &encrypting_private_key);
+    CK_RV rv = generate_rsa_keypair(session, 2048, &encrypting_public_key, &decrypting_private_key);
     if (rv != CKR_OK) {
         printf("RSA key generation failed: %lu\n", rv);
         return rv;
