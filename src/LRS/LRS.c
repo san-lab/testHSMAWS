@@ -95,7 +95,7 @@ done:
     return rv;
 }
 
-CK_RV rsa_encrypt_encrypt(CK_SESSION_HANDLE session) {
+CK_RV rsa_encrypt_decrypt(CK_SESSION_HANDLE session) {
     CK_OBJECT_HANDLE encrypting_public_key = CK_INVALID_HANDLE;
     CK_OBJECT_HANDLE decrypting_private_key = CK_INVALID_HANDLE;
 
@@ -125,22 +125,48 @@ CK_RV rsa_encrypt_encrypt(CK_SESSION_HANDLE session) {
         }
 
         printf("Data: %s\n", data);
-        printf("Signature: %s\n", hex_ciphertext);
+        printf("Ciphertext: %s\n", hex_ciphertext);
         free(hex_ciphertext);
         hex_ciphertext = NULL;
     } else {
-        printf("Signature generation failed: %lu\n", rv);
+        printf("Ciphertext generation failed: %lu\n", rv);
         return rv;
     }
 
-    /*rv = verify_signature(session, signing_public_key, mechanism,
-                          data, data_length, signature, signature_length);
+    ////////DECRYPT///////
+
+    CK_ULONG decrypted_ciphertext_length = 0;
+    rv = funcs->C_Decrypt(session, ciphertext, ciphertext_length, NULL, &decrypted_ciphertext_length);
+    if (CKR_OK != rv) {
+        printf("Decryption failed: %lu\n", rv);
+        goto done;
+    }
+
+    // Allocate memory for the decrypted ciphertext.
+    decrypted_ciphertext = malloc(decrypted_ciphertext_length + 1); //We want to null terminate the raw chars later
+    if (NULL == decrypted_ciphertext) {
+        rv = 1;
+        printf("Could not allocate memory for decrypted ciphertext\n");
+        goto done;
+    }
+
+    rv = rsa_decrypt(session, decrypting_private_key, mechanism,
+                          ciphertext, ciphertext_length, decrypted_ciphertext, decrypted_ciphertext_length);
     if (rv == CKR_OK) {
-        printf("Verification successful\n");
+        unsigned char *hex_plaintext = NULL;
+        bytes_to_new_hexstring(ciphertext, ciphertext_length, &hex_plaintext);
+        if (!hex_plaintext) {
+            printf("Could not allocate hex array\n");
+            return 1;
+        }
+
+        printf("Plaintext decrypted: %s\n", hex_plaintext);
+        free(hex_plaintext);
+        hex_plaintext = NULL;
     } else {
-        printf("Verification failed: %lu\n", rv);
+        printf("Decryption failed: %lu\n", rv);
         return rv;
-    }*/
+    }
 
     return CKR_OK;
 }
@@ -170,7 +196,7 @@ int main(int argc, char **argv) {
     }
 
     printf("Encrypt with RSA\n");
-    rv = rsa_encrypt_encrypt(session);
+    rv = rsa_encrypt(session);
     if (rv != CKR_OK)
         return rv;
 

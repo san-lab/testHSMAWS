@@ -41,5 +41,12 @@ CK_RV rsa_encrypt(CK_SESSION_HANDLE session,
                                 CK_ULONG data_length,
                                 CK_BYTE_PTR ciphertext,
                                 CK_ULONG_PTR ciphertext_length);
+CK_RV rsa_decrypt(CK_SESSION_HANDLE session,
+                                CK_OBJECT_HANDLE key,
+                                CK_MECHANISM_TYPE mechanism,
+                                CK_BYTE_PTR ciphertext,
+                                CK_ULONG ciphertext_length,
+                                CK_BYTE_PTR data,
+                                CK_ULONG_PTR data_length);
 
 #endif //PKCS11_EXAMPLES_ENCRYPT_AES_H

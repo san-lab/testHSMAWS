@@ -114,3 +114,26 @@ CK_RV rsa_encrypt(CK_SESSION_HANDLE session,
     rv = funcs->C_Encrypt(session, data, data_length, ciphertext, ciphertext_length);
     return rv;
 }
+
+CK_RV rsa_decrypt(CK_SESSION_HANDLE session,
+                                CK_OBJECT_HANDLE key,
+                                CK_MECHANISM_TYPE mechanism,
+                                CK_BYTE_PTR ciphertext,
+                                CK_ULONG ciphertext_length,
+                                CK_BYTE_PTR data,
+                                CK_ULONG_PTR data_length) {
+    CK_RV rv;
+    CK_MECHANISM mech;
+
+    mech.mechanism = mechanism;
+    mech.ulParameterLen = 0;
+    mech.pParameter = NULL;
+
+    rv = funcs->C_DecryptInit(session, &mech, key);
+    if (rv != CKR_OK) {
+        return !CKR_OK;
+    }
+
+    rv = funcs->C_Decrypt(session, ciphertext, ciphertext_length, data, data_length);
+    return rv;
+}
