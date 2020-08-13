@@ -63,4 +63,10 @@ RSA *read_RSA_PUBKEY(char *path);
 
 RSA *read_RSA_PRIVKEY(char *path);
 
+int import_RSA_KeyPair(CK_SESSION_HANDLE session,
+                        char *path_pubKey,
+                        char *path_privKey,
+                        CK_OBJECT_HANDLE_PTR public_key,
+                        CK_OBJECT_HANDLE_PTR private_key);
+
 #endif //PKCS11_EXAMPLES_ENCRYPT_AES_H
