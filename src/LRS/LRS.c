@@ -318,8 +318,8 @@ int main(int argc, char **argv) {
     if (rv != CKR_OK)
         return rv;
 
-    CK_OBJECT_HANDLE enc_public_key = CK_INVALID_HANDLE;
-    CK_OBJECT_HANDLE dec_private_key = CK_INVALID_HANDLE;
+    CK_OBJECT_HANDLE encrypting_public_key = CK_INVALID_HANDLE;
+    CK_OBJECT_HANDLE decrypting_private_key = CK_INVALID_HANDLE;
 
     char paths[2][40] = 
     {
@@ -327,13 +327,18 @@ int main(int argc, char **argv) {
         "./rsa.private"
     };
 
-    printf("Import RSA pubKey and privKey\n");
-    rv = import_RSA_KeyPair(session, paths[0], paths[1], &enc_public_key, &dec_private_key);
+    printf("Import RSA pubKey\n");
+    rv = import_RSA_PUBKEY(session, paths[0], &encrypting_public_key);
+    if (rv != CKR_OK)
+        return rv;
+
+    printf("Import RSA privKey\n");
+    rv = import_RSA_PRIVKEY(session, paths[1], &decrypting_private_key);
     if (rv != CKR_OK)
         return rv;
 
     printf("Encrypt/Decrypt with imported RSA keys \n");
-    rv = rsa_encrypt_decrypt_imported(session, enc_public_key, dec_private_key);
+    rv = rsa_encrypt_decrypt_imported(session, encrypting_public_key, decrypting_private_key);
     if (rv != CKR_OK)
         return rv;
 
