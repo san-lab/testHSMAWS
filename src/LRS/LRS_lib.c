@@ -360,7 +360,7 @@ int export_RSA_PRIVKEY(CK_SESSION_HANDLE session,
             //{CKA_COEFFICIENT,       NULL,        0},
     };
 
-    rv = funcs->C_GetAttributeValue(session, *private_key, priv_tmpl, 3);
+    rv = funcs->C_GetAttributeValue(session, *private_key, priv_tmpl, 2);
     if (rv == CKR_OK) {
         CK_BYTE_PTR pModulus, pExponent, privExponent;
         pModulus = (CK_BYTE_PTR) malloc(priv_tmpl[0].ulValueLen);
@@ -372,7 +372,7 @@ int export_RSA_PRIVKEY(CK_SESSION_HANDLE session,
         privExponent = (CK_BYTE_PTR) malloc(priv_tmpl[2].ulValueLen);
         priv_tmpl[2].pValue = privExponent;
          
-        rv = funcs->C_GetAttributeValue(session, *private_key, priv_tmpl, 3);
+        rv = funcs->C_GetAttributeValue(session, *private_key, priv_tmpl, 2);
     }
     else {
         fprintf(stderr, "Failed to create object %lu\n", rv);
