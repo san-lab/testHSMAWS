@@ -171,7 +171,7 @@ int export_RSA_PUBKEY(CK_SESSION_HANDLE session,
         pub_tmpl[1].pValue = pExponent;
         /* template[1].ulValueLen was set by C_GetAttributeValue */
          
-        rv = C_GetAttributeValue(session, *public_key, pub_tmpl, 2);
+        rv = funcs->C_GetAttributeValue(session, *public_key, pub_tmpl, 2);
     }
     else {
         fprintf(stderr, "Failed to create object %lu\n", rv);
