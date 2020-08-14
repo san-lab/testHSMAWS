@@ -129,6 +129,50 @@ int import_RSA_PUBKEY(CK_SESSION_HANDLE session,
     return rv;
 }
 
+int *write_RSA_PUBKEY(char *path, RSA rsa)
+{
+    /* Write RSA Pub Key */
+
+    BIO *pubout = BIO_new_file(path, "w");
+    if (pubin == NULL) {
+        fprintf(stderr, "Failed to open RSA Pub Key, %s\n%s\n", path, ERR_error_string(ERR_get_error(), NULL));
+        return 1;
+    }
+
+    if (!PEM_write_bio_RSAPublicKey(pubout, &rsa)) {
+        fprintf(stderr, "Failed to write RSA pub key.\n%s\n", ERR_error_string(ERR_get_error(), NULL));
+        return 1;
+    }
+
+    return 0;
+}
+
+int export_RSA_PUBKEY(CK_SESSION_HANDLE session,
+                        char *path,
+                        CK_OBJECT_HANDLE_PTR public_key) {
+    CK_RV rv;
+    int rc = 1;
+
+    CK_ATTRIBUTE pub_tmpl[] = {
+            {CKA_MODULUS,         NULL,        0},
+            {CKA_PUBLIC_EXPONENT, NULL,        0},
+    };
+
+    rv = C_GetAttributeValue(session, *public_key, pub_tmpl, sizeof(pub_tmpl) / sizeof(CK_ATTRIBUTE))
+    if (CKR_OK != rv) {
+        fprintf(stderr, "Failed to create object %lu\n", rv);
+        return rc;
+    }
+
+    RSA *pub_key = RSA_new();
+    BN_bin2bn(pub_tmpl[0].pValue, pub_tmpl[0].ulValueLen ,pub_key->e)
+    BN_bin2bn(pub_tmpl[1].pValue, pub_tmpl[1].ulValueLen ,pub_key->n)
+
+    rv = write_RSA_PUBKEY(path, pub_key)
+
+    return rv;
+}
+
 /**
  * Read an RSA private key into an RSA structure.
  * @param path
@@ -218,6 +262,52 @@ int import_RSA_PRIVKEY(CK_SESSION_HANDLE session,
         fprintf(stderr, "Failed to create object %lu\n", rv);
         return rc;
     }
+
+    return rv;
+}
+
+int *write_RSA_PRIVKEY(char *path, RSA rsa)
+{
+    /* Write RSA Pub Key */
+
+    BIO *privout = BIO_new_file(path, "w");
+    if (privout == NULL) {
+        fprintf(stderr, "Failed to open RSA Pub Key, %s\n%s\n", path, ERR_error_string(ERR_get_error(), NULL));
+        return 1;
+    }
+
+    if (!PEM_write_bio_RSAPrivateKey(privout, &rsa, NULL, NULL, 0, NULL, NULL)) {
+        fprintf(stderr, "Failed to write RSA priv key.\n%s\n", ERR_error_string(ERR_get_error(), NULL));
+        return 1;
+    }
+
+    return 0;
+}
+
+int export_RSA_PRIVKEY(CK_SESSION_HANDLE session,
+                        char *path,
+                        CK_OBJECT_HANDLE_PTR private_key) {
+    CK_RV rv;
+    int rc = 1;
+
+    CK_ATTRIBUTE priv_tmpl[] = {
+            {CKA_MODULUS,           NULL,        0},
+            {CKA_PUBLIC_EXPONENT,   NULL,        0},
+            {CKA_PRIVATE_EXPONENT,  NULL,        0},
+    };
+
+    rv = C_GetAttributeValue(session, *private_key, priv_tmpl, sizeof(priv_tmpl) / sizeof(CK_ATTRIBUTE))
+    if (CKR_OK != rv) {
+        fprintf(stderr, "Failed to create object %lu\n", rv);
+        return rc;
+    }
+
+    RSA *priv_key = RSA_new();
+    BN_bin2bn(priv_tmpl[0].pValue, priv_tmpl[0].ulValueLen ,priv_key->e)
+    BN_bin2bn(priv_tmpl[1].pValue, priv_tmpl[1].ulValueLen ,priv_key->n)
+    BN_bin2bn(priv_tmpl[2].pValue, priv_tmpl[2].ulValueLen ,priv_key->d)
+
+    rv = write_RSA_PRIVKEY(path, priv_key)
 
     return rv;
 }

@@ -65,9 +65,21 @@ int import_RSA_PUBKEY(CK_SESSION_HANDLE session,
                         char *path,
                         CK_OBJECT_HANDLE_PTR public_key);
 
+int *write_RSA_PUBKEY(char *path, RSA rsa);
+
+int export_RSA_PUBKEY(CK_SESSION_HANDLE session,
+                        char *path,
+                        CK_OBJECT_HANDLE_PTR public_key);
+
 RSA *read_RSA_PRIVKEY(char *path);
 
 int import_RSA_PRIVKEY(CK_SESSION_HANDLE session,
+                        char *path,
+                        CK_OBJECT_HANDLE_PTR private_key);
+
+int *write_RSA_PRIVKEY(char *path, RSA rsa);
+
+int export_RSA_PRIVKEY(CK_SESSION_HANDLE session,
                         char *path,
                         CK_OBJECT_HANDLE_PTR private_key);
 

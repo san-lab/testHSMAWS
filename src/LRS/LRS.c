@@ -210,6 +210,15 @@ CK_RV rsa_encrypt_decrypt(CK_SESSION_HANDLE session) {
     printf("Decrypted ciphertext: %s\n", decrypted_ciphertext);
     printf("Decrypted ciphertext length: %lu\n", decrypted_ciphertext_length);
 
+    char paths[2][40] = 
+    {
+        "./rsa2.public",
+        "./rsa2.private"
+    };
+
+    export_RSA_PUBKEY(session, paths[0], &encrypting_public_key);
+    export_RSA_PRIVKEY(session, paths[1], &decrypting_private_key)
+
     return CKR_OK;
 }
 
