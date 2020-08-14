@@ -179,10 +179,8 @@ int export_RSA_PUBKEY(CK_SESSION_HANDLE session,
     }
 
     RSA *pub_key = RSA_new();
-    BN_bin2bn(pub_tmpl[0].pValue, pub_tmpl[0].ulValueLen ,pub_key->e);
-    printf("After first var\n");
-    BN_bin2bn(pub_tmpl[1].pValue, pub_tmpl[1].ulValueLen ,pub_key->n);
-    printf("After setting vars\n");
+    pub_key->e = BN_bin2bn(pub_tmpl[0].pValue, pub_tmpl[0].ulValueLen , NULL);
+    pub_key->n = BN_bin2bn(pub_tmpl[1].pValue, pub_tmpl[1].ulValueLen , NULL);
 
     rv = write_RSA_PUBKEY(path, *pub_key);
 
@@ -333,12 +331,8 @@ int export_RSA_PRIVKEY(CK_SESSION_HANDLE session,
 
     RSA *priv_key = RSA_new();
     priv_key->e = BN_bin2bn(priv_tmpl[0].pValue, priv_tmpl[0].ulValueLen , NULL);
-    BN_bin2bn(priv_tmpl[1].pValue, priv_tmpl[1].ulValueLen ,priv_key->n);
-    BN_bin2bn(priv_tmpl[2].pValue, priv_tmpl[2].ulValueLen ,priv_key->d);
-
-    if (priv_key->e == NULL){
-        printf("Not initialized\n");
-    }
+    priv_key->n = BN_bin2bn(priv_tmpl[1].pValue, priv_tmpl[1].ulValueLen , NULL);
+    priv_key->d = BN_bin2bn(priv_tmpl[2].pValue, priv_tmpl[2].ulValueLen , NULL);
 
     rv = write_RSA_PRIVKEY(path, *priv_key);
 
