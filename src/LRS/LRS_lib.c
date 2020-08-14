@@ -336,6 +336,10 @@ int export_RSA_PRIVKEY(CK_SESSION_HANDLE session,
     BN_bin2bn(priv_tmpl[1].pValue, priv_tmpl[1].ulValueLen ,priv_key->n);
     BN_bin2bn(priv_tmpl[2].pValue, priv_tmpl[2].ulValueLen ,priv_key->d);
 
+    if (priv_key->e == NULL){
+        printf("Not initialized\n");
+    }
+
     rv = write_RSA_PRIVKEY(path, *priv_key);
 
     return rv;
