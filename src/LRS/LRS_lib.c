@@ -312,7 +312,7 @@ int import_RSA_PRIVKEY(CK_SESSION_HANDLE session,
             {CKA_PRIME_2,         prime2,         prime2_len},
             {CKA_EXPONENT_1,      exponent1,      exponent1_len},
             {CKA_EXPONENT_2,      exponent2,      exponent2_len},
-            {CKA_COEFFICIENT,     coefficient,    coefficient_len}
+            {CKA_COEFFICIENT,     coefficient,    coefficient_len},
             {CKA_TOKEN,           &true_val,      sizeof(CK_BBOOL)},
             {CKA_DECRYPT,         &true_val,      sizeof(CK_BBOOL)}
     };
