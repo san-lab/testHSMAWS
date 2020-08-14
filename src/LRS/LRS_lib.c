@@ -129,7 +129,7 @@ int import_RSA_PUBKEY(CK_SESSION_HANDLE session,
     return rv;
 }
 
-int *write_RSA_PUBKEY(char *path, RSA rsa)
+void *write_RSA_PUBKEY(char *path, RSA rsa)
 {
     /* Write RSA Pub Key */
 
@@ -168,7 +168,7 @@ int export_RSA_PUBKEY(CK_SESSION_HANDLE session,
     BN_bin2bn(pub_tmpl[0].pValue, pub_tmpl[0].ulValueLen ,pub_key->e);
     BN_bin2bn(pub_tmpl[1].pValue, pub_tmpl[1].ulValueLen ,pub_key->n);
 
-    rv = write_RSA_PUBKEY(path, pub_key)
+    rv = write_RSA_PUBKEY(path, *pub_key)
 
     return rv;
 }
@@ -307,7 +307,7 @@ int export_RSA_PRIVKEY(CK_SESSION_HANDLE session,
     BN_bin2bn(priv_tmpl[1].pValue, priv_tmpl[1].ulValueLen ,priv_key->n)
     BN_bin2bn(priv_tmpl[2].pValue, priv_tmpl[2].ulValueLen ,priv_key->d)
 
-    rv = write_RSA_PRIVKEY(path, priv_key)
+    rv = write_RSA_PRIVKEY(path, *priv_key)
 
     return rv;
 }
