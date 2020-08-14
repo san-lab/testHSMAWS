@@ -129,22 +129,22 @@ int import_RSA_PUBKEY(CK_SESSION_HANDLE session,
     return rv;
 }
 
-void *write_RSA_PUBKEY(char *path, RSA rsa)
+int write_RSA_PUBKEY(char *path, RSA rsa)
 {
     /* Write RSA Pub Key */
 
     BIO *pubout = BIO_new_file(path, "w");
     if (pubout == NULL) {
         fprintf(stderr, "Failed to open RSA Pub Key, %s\n%s\n", path, ERR_error_string(ERR_get_error(), NULL));
-        return;
+        return 1;
     }
 
     if (!PEM_write_bio_RSAPublicKey(pubout, &rsa)) {
         fprintf(stderr, "Failed to write RSA pub key.\n%s\n", ERR_error_string(ERR_get_error(), NULL));
-        return;
+        return 1;
     }
 
-    return;
+    return 0;
 }
 
 int export_RSA_PUBKEY(CK_SESSION_HANDLE session,
@@ -168,7 +168,7 @@ int export_RSA_PUBKEY(CK_SESSION_HANDLE session,
     BN_bin2bn(pub_tmpl[0].pValue, pub_tmpl[0].ulValueLen ,pub_key->e);
     BN_bin2bn(pub_tmpl[1].pValue, pub_tmpl[1].ulValueLen ,pub_key->n);
 
-    write_RSA_PUBKEY(path, *pub_key)
+    rv = write_RSA_PUBKEY(path, *pub_key);
 
     return rv;
 }
@@ -266,22 +266,22 @@ int import_RSA_PRIVKEY(CK_SESSION_HANDLE session,
     return rv;
 }
 
-void *write_RSA_PRIVKEY(char *path, RSA rsa)
+int write_RSA_PRIVKEY(char *path, RSA rsa)
 {
     /* Write RSA Pub Key */
 
     BIO *privout = BIO_new_file(path, "w");
     if (privout == NULL) {
         fprintf(stderr, "Failed to open RSA Pub Key, %s\n%s\n", path, ERR_error_string(ERR_get_error(), NULL));
-        return;
+        return 0;
     }
 
     if (!PEM_write_bio_RSAPrivateKey(privout, &rsa, NULL, NULL, 0, NULL, NULL)) {
         fprintf(stderr, "Failed to write RSA priv key.\n%s\n", ERR_error_string(ERR_get_error(), NULL));
-        return;
+        return 0;
     }
 
-    return;
+    return 1;
 }
 
 int export_RSA_PRIVKEY(CK_SESSION_HANDLE session,
@@ -307,7 +307,7 @@ int export_RSA_PRIVKEY(CK_SESSION_HANDLE session,
     BN_bin2bn(priv_tmpl[1].pValue, priv_tmpl[1].ulValueLen ,priv_key->n)
     BN_bin2bn(priv_tmpl[2].pValue, priv_tmpl[2].ulValueLen ,priv_key->d)
 
-    write_RSA_PRIVKEY(path, *priv_key)
+    rv = write_RSA_PRIVKEY(path, *priv_key)
 
     return rv;
 }
