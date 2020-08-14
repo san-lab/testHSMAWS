@@ -134,7 +134,7 @@ int *write_RSA_PUBKEY(char *path, RSA rsa)
     /* Write RSA Pub Key */
 
     BIO *pubout = BIO_new_file(path, "w");
-    if (pubin == NULL) {
+    if (pubout == NULL) {
         fprintf(stderr, "Failed to open RSA Pub Key, %s\n%s\n", path, ERR_error_string(ERR_get_error(), NULL));
         return 1;
     }
@@ -158,15 +158,15 @@ int export_RSA_PUBKEY(CK_SESSION_HANDLE session,
             {CKA_PUBLIC_EXPONENT, NULL,        0},
     };
 
-    rv = C_GetAttributeValue(session, *public_key, pub_tmpl, sizeof(pub_tmpl) / sizeof(CK_ATTRIBUTE))
+    rv = C_GetAttributeValue(session, *public_key, pub_tmpl, sizeof(pub_tmpl) / sizeof(CK_ATTRIBUTE));
     if (CKR_OK != rv) {
         fprintf(stderr, "Failed to create object %lu\n", rv);
         return rc;
     }
 
     RSA *pub_key = RSA_new();
-    BN_bin2bn(pub_tmpl[0].pValue, pub_tmpl[0].ulValueLen ,pub_key->e)
-    BN_bin2bn(pub_tmpl[1].pValue, pub_tmpl[1].ulValueLen ,pub_key->n)
+    BN_bin2bn(pub_tmpl[0].pValue, pub_tmpl[0].ulValueLen ,pub_key->e);
+    BN_bin2bn(pub_tmpl[1].pValue, pub_tmpl[1].ulValueLen ,pub_key->n);
 
     rv = write_RSA_PUBKEY(path, pub_key)
 
