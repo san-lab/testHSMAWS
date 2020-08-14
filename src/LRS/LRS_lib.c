@@ -254,6 +254,46 @@ int import_RSA_PRIVKEY(CK_SESSION_HANDLE session,
     }
     BN_bn2bin(key->n, modulus);
 
+    CK_ULONG prime1_len = BN_num_bytes(key->p);
+    CK_BYTE *prime1 = malloc(prime1_len);
+    if (prime1 == NULL) {
+        fprintf(stderr, "Failed to allocate memory for prime1: %s\n", strerror(errno));
+        return rc;
+    }
+    BN_bn2bin(key->p, prime1);
+
+    CK_ULONG prime2_len = BN_num_bytes(key->q);
+    CK_BYTE *prime2 = malloc(prime2_len);
+    if (prime2 == NULL) {
+        fprintf(stderr, "Failed to allocate memory for prime1: %s\n", strerror(errno));
+        return rc;
+    }
+    BN_bn2bin(key->q, prime2);
+
+    CK_ULONG exponent1_len = BN_num_bytes(key->dmp1);
+    CK_BYTE *exponent1 = malloc(exponent1_len);
+    if (exponent1 == NULL) {
+        fprintf(stderr, "Failed to allocate memory for prime1: %s\n", strerror(errno));
+        return rc;
+    }
+    BN_bn2bin(key->dmp1, exponent1);
+
+    CK_ULONG exponent2_len = BN_num_bytes(key->dmq1);
+    CK_BYTE *exponent2 = malloc(exponent2_len);
+    if (exponent2 == NULL) {
+        fprintf(stderr, "Failed to allocate memory for prime1: %s\n", strerror(errno));
+        return rc;
+    }
+    BN_bn2bin(key->dmq1, exponent2);
+
+    CK_ULONG coefficient_len = BN_num_bytes(key->iqmp);
+    CK_BYTE *coefficient = malloc(coefficient_len);
+    if (coefficient == NULL) {
+        fprintf(stderr, "Failed to allocate memory for prime1: %s\n", strerror(errno));
+        return rc;
+    }
+    BN_bn2bin(key->iqmp, coefficient);
+
     RSA_free(key);
 
     /* Using the modulus and exponent from above, we can "import" the key by creating
@@ -268,6 +308,11 @@ int import_RSA_PRIVKEY(CK_SESSION_HANDLE session,
             {CKA_MODULUS,         modulus,        modulus_len},
             {CKA_PUBLIC_EXPONENT, pub_exp,        pub_exp_len},
             {CKA_PRIVATE_EXPONENT,priv_exp,       priv_exp_len},
+            {CKA_PRIME_1,         prime1,         prime1_len},
+            {CKA_PRIME_2,         prime2,         prime2_len},
+            {CKA_EXPONENT_1,      exponent1,      exponent1_len},
+            {CKA_EXPONENT_2,      exponent2,      exponent2_len},
+            {CKA_COEFFICIENT,     coefficient,    coefficient_len}
             {CKA_TOKEN,           &true_val,      sizeof(CK_BBOOL)},
             {CKA_DECRYPT,         &true_val,      sizeof(CK_BBOOL)}
     };
