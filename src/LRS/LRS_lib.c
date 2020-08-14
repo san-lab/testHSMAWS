@@ -132,6 +132,7 @@ int import_RSA_PUBKEY(CK_SESSION_HANDLE session,
 int write_RSA_PUBKEY(char *path, RSA rsa)
 {
     /* Write RSA Pub Key */
+    printf("Entro al write RSA_PUBKEY\n");
 
     BIO *pubout = BIO_new_file(path, "w");
     if (pubout == NULL) {
