@@ -132,21 +132,19 @@ int import_RSA_PUBKEY(CK_SESSION_HANDLE session,
 int *write_RSA_PUBKEY(char *path, RSA rsa)
 {
     /* Write RSA Pub Key */
-    int r_err = 1;
-    int r_ok = 0;
 
     BIO *pubout = BIO_new_file(path, "w");
     if (pubout == NULL) {
         fprintf(stderr, "Failed to open RSA Pub Key, %s\n%s\n", path, ERR_error_string(ERR_get_error(), NULL));
-        return r_err;
+        return;
     }
 
     if (!PEM_write_bio_RSAPublicKey(pubout, &rsa)) {
         fprintf(stderr, "Failed to write RSA pub key.\n%s\n", ERR_error_string(ERR_get_error(), NULL));
-        return r_err;
+        return;
     }
 
-    return r_ok;
+    return;
 }
 
 int export_RSA_PUBKEY(CK_SESSION_HANDLE session,
@@ -268,24 +266,22 @@ int import_RSA_PRIVKEY(CK_SESSION_HANDLE session,
     return rv;
 }
 
-int *write_RSA_PRIVKEY(char *path, RSA rsa)
+void *write_RSA_PRIVKEY(char *path, RSA rsa)
 {
     /* Write RSA Pub Key */
-    int r_err = 1;
-    int r_ok = 0;
 
     BIO *privout = BIO_new_file(path, "w");
     if (privout == NULL) {
         fprintf(stderr, "Failed to open RSA Pub Key, %s\n%s\n", path, ERR_error_string(ERR_get_error(), NULL));
-        return r_err;
+        return;
     }
 
     if (!PEM_write_bio_RSAPrivateKey(privout, &rsa, NULL, NULL, 0, NULL, NULL)) {
         fprintf(stderr, "Failed to write RSA priv key.\n%s\n", ERR_error_string(ERR_get_error(), NULL));
-        return r_err;
+        return;
     }
 
-    return r_ok;
+    return;
 }
 
 int export_RSA_PRIVKEY(CK_SESSION_HANDLE session,
