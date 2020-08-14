@@ -167,7 +167,7 @@ int export_RSA_PUBKEY(CK_SESSION_HANDLE session,
 
 
     RSA *pub_key = RSA_new();
-    pub_key->e = BN_bin2bn(pub_tmpl[0].pValue, pub_tmpl[0].ulValueLen ,NULL);
+    (*pub_key).e = BN_bin2bn(pub_tmpl[0].pValue, pub_tmpl[0].ulValueLen ,NULL);
     printf("After first var\n");
     BN_bin2bn(pub_tmpl[1].pValue, pub_tmpl[1].ulValueLen ,(*pub_key).n);
     printf("After setting vars\n");
