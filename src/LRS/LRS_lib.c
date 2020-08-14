@@ -158,7 +158,7 @@ int export_RSA_PUBKEY(CK_SESSION_HANDLE session,
             {CKA_PUBLIC_EXPONENT, NULL,        0},
     };
 
-    rv = C_GetAttributeValue(session, *public_key, pub_tmpl, sizeof(pub_tmpl) / sizeof(CK_ATTRIBUTE));
+    rv = funcs->C_GetAttributeValue(session, *public_key, pub_tmpl, sizeof(pub_tmpl) / sizeof(CK_ATTRIBUTE));
     if (CKR_OK != rv) {
         fprintf(stderr, "Failed to create object %lu\n", rv);
         return rc;
@@ -296,7 +296,7 @@ int export_RSA_PRIVKEY(CK_SESSION_HANDLE session,
             {CKA_PRIVATE_EXPONENT,  NULL,        0},
     };
 
-    rv = C_GetAttributeValue(session, *private_key, priv_tmpl, sizeof(priv_tmpl) / sizeof(CK_ATTRIBUTE));
+    rv = funcs->C_GetAttributeValue(session, *private_key, priv_tmpl, sizeof(priv_tmpl) / sizeof(CK_ATTRIBUTE));
     if (CKR_OK != rv) {
         fprintf(stderr, "Failed to create object %lu\n", rv);
         return rc;
