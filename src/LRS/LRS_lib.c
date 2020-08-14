@@ -353,11 +353,11 @@ int export_RSA_PRIVKEY(CK_SESSION_HANDLE session,
             {CKA_MODULUS,           NULL,        0},
             {CKA_PUBLIC_EXPONENT,   NULL,        0},
             {CKA_PRIVATE_EXPONENT,  NULL,        0},
-            {CKA_PRIME_1,           NULL,        0},
-            {CKA_PRIME_2,           NULL,        0},
-            {CKA_EXPONENT_1,        NULL,        0},
-            {CKA_EXPONENT_2,        NULL,        0},
-            {CKA_COEFFICIENT,       NULL,        0},
+            //{CKA_PRIME_1,           NULL,        0},
+            //{CKA_PRIME_2,           NULL,        0},
+            //{CKA_EXPONENT_1,        NULL,        0},
+            //{CKA_EXPONENT_2,        NULL,        0},
+            //{CKA_COEFFICIENT,       NULL,        0},
     };
 
     rv = funcs->C_GetAttributeValue(session, *private_key, priv_tmpl, 3);
