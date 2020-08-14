@@ -217,7 +217,7 @@ CK_RV rsa_encrypt_decrypt(CK_SESSION_HANDLE session) {
     };
 
     export_RSA_PUBKEY(session, paths[0], &encrypting_public_key);
-    export_RSA_PRIVKEY(session, paths[1], &decrypting_private_key)
+    export_RSA_PRIVKEY(session, paths[1], &decrypting_private_key);
 
     return CKR_OK;
 }
