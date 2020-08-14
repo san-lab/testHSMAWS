@@ -165,9 +165,15 @@ int export_RSA_PUBKEY(CK_SESSION_HANDLE session,
         return rc;
     }
 
+    printf("After getAttributes\n");
+
+
     RSA *pub_key = RSA_new();
+    printf("After creating RSA\n");
     BN_bin2bn(pub_tmpl[0].pValue, pub_tmpl[0].ulValueLen ,pub_key->e);
     BN_bin2bn(pub_tmpl[1].pValue, pub_tmpl[1].ulValueLen ,pub_key->n);
+
+    printf("After setting vars\n");
 
     rv = write_RSA_PUBKEY(path, *pub_key);
 
