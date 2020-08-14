@@ -316,13 +316,13 @@ int export_RSA_PRIVKEY(CK_SESSION_HANDLE session,
     if (rv == CKR_OK) {
         CK_BYTE_PTR pModulus, pExponent, privExponent;
         pModulus = (CK_BYTE_PTR) malloc(priv_tmpl[0].ulValueLen);
-        pub_tmpl[0].pValue = pModulus;
+        priv_tmpl[0].pValue = pModulus;
          
         pExponent = (CK_BYTE_PTR) malloc(priv_tmpl[1].ulValueLen);
-        pub_tmpl[1].pValue = pExponent;
+        priv_tmpl[1].pValue = pExponent;
 
         privExponent = (CK_BYTE_PTR) malloc(priv_tmpl[2].ulValueLen);
-        pub_tmpl[2].pValue = privExponent;
+        priv_tmpl[2].pValue = privExponent;
          
         rv = funcs->C_GetAttributeValue(session, *private_key, priv_tmpl, 2);
     }
