@@ -159,17 +159,28 @@ int export_RSA_PUBKEY(CK_SESSION_HANDLE session,
             {CKA_PUBLIC_EXPONENT, NULL,        0},
     };
 
-    rv = funcs->C_GetAttributeValue(session, *public_key, pub_tmpl, sizeof(pub_tmpl) / sizeof(CK_ATTRIBUTE));
-    if (CKR_OK != rv) {
+    rv = funcs->C_GetAttributeValue(session, *public_key, &pub_tmpl, 2);
+
+    if (rv == CKR_OK) {
+      pModulus = (CK_BYTE_PTR) malloc(template[0].ulValueLen);
+      pub_tmpl[0].pValue = pModulus;
+      /* template[0].ulValueLen was set by C_GetAttributeValue */
+     
+      pExponent = (CK_BYTE_PTR) malloc(template[1].ulValueLen);
+      pub_tmpl[1].pValue = pExponent;
+      /* template[1].ulValueLen was set by C_GetAttributeValue */
+     
+      rv = C_GetAttributeValue(session, *public_key, &pub_tmpl, 2);
+    }
+    else {
         fprintf(stderr, "Failed to create object %lu\n", rv);
         return rc;
     }
 
-
     RSA *pub_key = RSA_new();
-    (*pub_key).e = BN_bin2bn(pub_tmpl[0].pValue, pub_tmpl[0].ulValueLen ,NULL);
+    BN_bin2bn(pub_tmpl[0].pValue, pub_tmpl[0].ulValueLen ,pub_key->e);
     printf("After first var\n");
-    BN_bin2bn(pub_tmpl[1].pValue, pub_tmpl[1].ulValueLen ,(*pub_key).n);
+    BN_bin2bn(pub_tmpl[1].pValue, pub_tmpl[1].ulValueLen ,pub_key->n);
     printf("After setting vars\n");
 
     rv = write_RSA_PUBKEY(path, *pub_key);
